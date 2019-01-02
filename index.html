@@ -29,11 +29,22 @@
 </html>
 
 <script>
+
+    function addValueToParticle(index){
+        let particleValues = document.getElementById("particleList").children[index];
+        let values = {};
+        for(let i = 0; i < particleValues.children.length; i++){
+            let child = particleValues.children[i];
+            values[child.id] = child.value;
+        }
+        bodies[index].velocity = new Vector2(values.vx, values.vy);
+        bodies[index].position = new Vector2(values.px, values.py);
+    }
+
     function addParticle(){
         document.getElementById("particleList").innerHTML += `<div><p>Particle ${bodies.length + 1}</p>
             <p>Velocity</p><input class="veccomponent" type="number" id="vx"><input class="veccomponent" type="number" id="vy"><p>Position</p><input class="veccomponent" type="number" id="px"><input class="veccomponent" type="number" id="py"></div>`;
         bodies.push(new Body(15, new Vector2(-10, -10), new Vector2(20, 20), "red"));
-    }
 </script>
 
 <script src="index.js"></script>
