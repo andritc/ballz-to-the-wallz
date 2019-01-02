@@ -1,21 +1,41 @@
-let canvas = document.getElementById("can");
-let context = canvas.getContext("2d");
+var canvas = document.getElementById("can");
+var context = canvas.getContext("2d");
 
-let p1;
-let p2;
+let bodies = [];
 let deltaTime = 0.01;
-
+let timeScale = 0;
 function start() {
-    p1 = new Body(10, new Vector2(10, 10), new Vector2(10, 10), "blue");
-    p2 = new Body(15, new Vector2(-10, -10), new Vector2(20, 20), "red");
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     setInterval(draw, deltaTime * 1000);
-    
 }
+
 //The mass and velocity are assigned values, and the particle is redrawn every deltaTime, which as been assigned a value of 0.01
 function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height)
-    p1.draw();
-    p2.draw();
+    context.fillStyle = "white";
+    
+    context.fillRect(0, 0, canvas.width,canvas.height);
+    checkCollision();
+    bodies.forEach((b) => {
+        b.draw();
+    });
+}
+
+function checkCollision() {
+    for (let x = 0; x < bodies.length - 1; x++) {
+        for (let y = x + 1; y < bodies.length; y++) {
+            let v1 = bodies[x];
+            let v2 = bodies[y];
+            let distance = Vector2.Distance(v1.position, v2.position);
+            if (v1.radius + v2.radius >= distance) {
+                v1.velocity.x = -  v1.velocity.x
+                v1.velocity.y = -  v1.velocity.y
+                v2.velocity.x = - v2.velocity.x
+                v2.velocity.y = - v2.velocity.y
+            }
+        }
+    }
 }
 
 //The function draws the canvas which is what the particle is then drawn on.
@@ -27,15 +47,16 @@ class Body {
         this.position = position;
         this.velocity = velocity;
     }
-// This class defines all the variables related to the particle
+    // This class defines all the variables related to the particle
     draw() {
-        this.position = Vector2.Add(this.position, Vector2.Multiply(this.velocity, deltaTime));
+        this.position = Vector2.Add(this.position, Vector2.Multiply(this.velocity, deltaTime * timeScale));
         context.beginPath();
         context.arc(MetreToPixels(this.position.x), MetreToPixels(this.position.y), MetreToPixels(this.radius), 0, 2 * Math.PI);
         context.fillStyle = this.colour;
         context.fill();
         this.checkWalls();
     }
+
 
     checkWalls() {
         if (this.position.x <= this.radius) {
@@ -56,20 +77,20 @@ class Vector2 {
         this.x = x;
         this.y = y;
     }
-// vectors are split into x and y components which means a magnitude and direction can be assigned
-    static Add(v1, v2){
+    // vectors are split into x and y components which means a magnitude and direction can be assigned
+    static Add(v1, v2) {
         return new Vector2(v1.x + v2.x, v1.y + v2.y);
     }
 
-    static Multiply(v1, s){
+    static Multiply(v1, s) {
         return new Vector2(v1.x * s, v1.y * s);
     }
 
-    static Minus(v1, v2){
+    static Minus(v1, v2) {
         return Vector2.Add(v1, Vector2.Multiply(v2, -1));
     }
 
-    static Distance(v1, v2){
+    static Distance(v1, v2) {
         let v = Vector2.Minus(v1, v2);
         return Math.sqrt(v.x ** 2 + v.y ** 2)
     }
@@ -77,12 +98,10 @@ class Vector2 {
 // These functions are later used for the vector calculations 
 const METER = 20;
 
-function PixelToMetres(pix){
+function PixelToMetres(pix) {
     return pix / METER;
 }
 
-function MetreToPixels(metre){
+function MetreToPixels(metre) {
     return metre * METER;
 }
-
-start();

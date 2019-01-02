@@ -1,20 +1,115 @@
 <html>
-    <head>
 
-    </head>
-    <body>
-        <canvas width=1200 height=600 id="can"></canvas>
-    </body>
+<head>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="table">
+        <div class="column can">
+            <div class="row can">
+                <canvas id="can"></canvas>
+            </div>
+            <div class="row buttons">
+                <button id="rewind"><i class="fas fa-backward"></i></button>
+                <button id="pause"><i class="fas fa-pause"></i></button>
+                <button id="restart"><i class="fas fa-redo-alt"></i></button>
+            </div>
+        </div>
+        <div class="column settingscol">
+            <div class="settings">
+                <div id="particleList"></div>
+                <button id="addparticle" onclick="addParticle()">Add particle</button>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>
+
+<script>
+    function addParticle(){
+        document.getElementById("particleList").innerHTML += `<div><p>Particle ${bodies.length + 1}</p>
+            <p>Velocity</p><input class="veccomponent" type="number" id="vx"><input class="veccomponent" type="number" id="vy"><p>Position</p><input class="veccomponent" type="number" id="px"><input class="veccomponent" type="number" id="py"></div>`;
+        bodies.push(new Body(15, new Vector2(-10, -10), new Vector2(20, 20), "red"));
+    }
+</script>
+
 <script src="index.js"></script>
 
 <style>
-*{
-    padding: 0;
+
+    body{
+        background-color: #3b3b3b;
+    }
+    * {
+        padding: 0;
+        margin: 0;
+    }
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
     margin: 0;
 }
-
-canvas{
-    border: black 2px solid;
+ 
+input[type="number"] {
+    -moz-appearance: textfield;
 }
+
+    .veccomponent{
+        width: 3ch;
+    }
+
+    .table{
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+    }
+
+    .column{
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .column.can{
+        width: 85vw;
+    }
+
+    .column.set{
+        width: 15vw;
+    }
+
+    .row{
+        flex: 0 1 auto;
+    }
+
+    .row.can{
+        flex: 0 1 auto;
+    }
+
+    .row.buttons{
+        flex: 0 1 auto;
+        height: 10vh;
+    }
+
+    .settingscol{
+        flex: 0 1 auto;
+        width: 15vw;
+    }
+
+    #can{
+        width: 100%;
+        height: 100%;
+    }
+
+    .row.can{
+        height: 90vh;
+        flex: 2 1 auto;
+    }
+
 </style>
+<script>
+        start();
+</script>
