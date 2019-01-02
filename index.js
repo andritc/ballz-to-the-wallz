@@ -6,19 +6,23 @@ let p2;
 let deltaTime = 0.01;
 
 function start() {
-    p1 = new Body(10, new Vector2(10, 10), new Vector2(10, 10));
+    p1 = new Body(10, new Vector2(10, 10), new Vector2(10, 10), "blue");
+    p2 = new Body(15, new Vector2(-10, -10), new Vector2(20, 20), "red");
     setInterval(draw, deltaTime * 1000);
     
 }
-//The mass and velocity are assigned values, and the particle is redrawn every delatTime, which as been assigned a value of 0.01
+//The mass and velocity are assigned values, and the particle is redrawn every deltaTime, which as been assigned a value of 0.01
 function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height)
     p1.draw();
+    p2.draw();
 }
-//THe function draws the canvas which is what the particle is then drawn on.
+
+//The function draws the canvas which is what the particle is then drawn on.
 class Body {
-    constructor(mass, velocity, position) {
+    constructor(mass, velocity, position, colour) {
         this.mass = mass
+        this.colour = colour
         this.radius = Math.sqrt(mass);
         this.position = position;
         this.velocity = velocity;
@@ -28,8 +32,22 @@ class Body {
         this.position = Vector2.Add(this.position, Vector2.Multiply(this.velocity, deltaTime));
         context.beginPath();
         context.arc(MetreToPixels(this.position.x), MetreToPixels(this.position.y), MetreToPixels(this.radius), 0, 2 * Math.PI);
-        context.fillStyle = "blue";
+        context.fillStyle = this.colour;
         context.fill();
+        this.checkWalls();
+    }
+
+    checkWalls() {
+        if (this.position.x <= this.radius) {
+            this.velocity.x = - this.velocity.x
+        } else if (this.position.x >= PixelToMetres(canvas.width) - this.radius) {
+            this.velocity.x = - this.velocity.x
+        }
+        if (this.position.y <= this.radius) {
+            this.velocity.y = - this.velocity.y
+        } else if (this.position.y >= PixelToMetres(canvas.height) - this.radius) {
+            this.velocity.y = - this.velocity.y
+        }
     }
 }
 // The particle is drawn according to the variables entered earlier. The function MetreToPixel is converting the pixels into metres to make calculations simpler 
