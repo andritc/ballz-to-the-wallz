@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
         crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -13,7 +15,7 @@
             </div>
             <div class="row buttons">
                 <button id="rewind"><i class="fas fa-backward"></i></button>
-                <button id="pause"><i class="fas fa-pause"></i></button>
+                <button id="pause" onclick="play()"><i class="fas fa-play"></i></button>
                 <button id="restart"><i class="fas fa-redo-alt"></i></button>
             </div>
         </div>
@@ -29,98 +31,197 @@
 </html>
 
 <script>
-
-    function addValueToParticle(index){
-        let particleValues = document.getElementById("particleList").children[index];
-        let values = {};
-        for(let i = 0; i < particleValues.children.length; i++){
-            let child = particleValues.children[i];
-            values[child.id] = child.value;
-        }
+    let selectedParticle = -1;
+    let colours = [
+        "red",
+        "blue",
+        "yellow",
+        "green"
+    ]
+    function addValueToParticle(index) {
+        let values = getParticleValues(index);
         bodies[index].velocity = new Vector2(values.vx, values.vy);
-        bodies[index].position = new Vector2(values.px, values.py);
     }
 
-    function addParticle(){
-        document.getElementById("particleList").innerHTML += `<div><p>Particle ${bodies.length + 1}</p>
-            <p>Velocity</p><input class="veccomponent" type="number" id="vx"><input class="veccomponent" type="number" id="vy"><p>Position</p><input class="veccomponent" type="number" id="px"><input class="veccomponent" type="number" id="py"></div>`;
-        bodies.push(new Body(15, new Vector2(-10, -10), new Vector2(20, 20), "red"));
+    function getParticleValues(index){
+        let values = {};
+        let particleValues = document.getElementById("particleList").children[index];
+        for (let i = 0; i < particleValues.children.length; i++) {
+            let child = particleValues.children[i];
+            if (child.value) {
+                values[child.id] = Number.parseInt(child.value);
+            }
+        }
+        return values;
+    }
+
+    function setParticleValues(index, values){
+        let particleValues = document.getElementById("particleList").children[index];
+        for (let i = 0; i < particleValues.children.length; i++) {
+            let child = particleValues.children[i];
+            if(values[child.id]){
+                child.setAttribute("value", values[child.id])
+            }
+        }
+        return values;
+    }
+
+    function addParticle() {
+        let values = [];
+        for(let i = 0; i < bodies.length; i++){
+            values.push(getParticleValues(i));
+        }
+        document.getElementById("particleList").innerHTML +=
+            `<div onclick="selectParticle(${bodies.length})" class="particleItem"><p>Particle ${bodies.length + 1}</p>
+            <p>Velocity</p><input class="veccomponent" type="number" id="vx"><input class="veccomponent" type="number" id="vy"></div>`;
+        values.forEach((val, i)=>{
+            setParticleValues(i, val)
+        })
+        bodies.push(new Body(15, new Vector2(-10, -10), new Vector2(20, 20), colours[Math.floor(Math.random() * colours.length)]));
+    }
+
+    function selectParticle(index) {
+        $(".particleItem").attr("style", "");
+        document.getElementById("particleList").children[index].setAttribute("style", "background-color: white;")
+        selectedParticle = index;
+    }
+
+    function moveParticle(keycode, particleIndex) {
+        switch (keycode) {
+            //left
+            case 37:
+                bodies[particleIndex].position.x -= 0.2;
+                break;
+                //up
+            case 38:
+                bodies[particleIndex].position.y -= 0.2;
+                break;
+                //right
+            case 39:
+                bodies[particleIndex].position.x += 0.2;
+                break;
+                //down
+            case 40:
+                bodies[particleIndex].position.y += 0.2;
+                break;
+        }
+    }
+
+    let moveInterval;
+
+    document.onkeydown = function (e) {
+        if (selectedParticle > -1 && !moveInterval) {
+            console.log("keydown")
+            moveInterval = setInterval(() => moveParticle(e.keyCode, selectedParticle), 20);
+        }
+    }
+
+    document.onkeyup = function (e) {
+        console.log("keyUp")
+        clearInterval(moveInterval);
+        moveInterval = undefined;
+    }
+
+    function play() {
+        bodies.forEach((b, i) => {
+            addValueToParticle(i);
+        });
+
+        document.getElementById("pause").children[0].setAttribute("class", "fas fa-pause");
+        timeScale = 1;
+    }
 </script>
 
 <script src="index.js"></script>
 
 <style>
-
-    body{
+    body {
         background-color: #3b3b3b;
     }
+
     * {
         padding: 0;
         margin: 0;
+        font-family: sans-serif;
     }
-    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
- 
-input[type="number"] {
-    -moz-appearance: textfield;
-}
 
-    .veccomponent{
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .veccomponent {
         width: 3ch;
     }
 
-    .table{
+    .table {
         display: flex;
         flex-direction: row;
         width: 100%;
         height: 100%;
     }
 
-    .column{
+    .column {
         flex: 0 1 auto;
         display: flex;
         flex-direction: column;
     }
 
-    .column.can{
+    .column.can {
         width: 85vw;
     }
 
-    .column.set{
+    .column.set {
         width: 15vw;
     }
 
-    .row{
+    .row {
         flex: 0 1 auto;
     }
 
-    .row.can{
+    .row.can {
         flex: 0 1 auto;
     }
 
-    .row.buttons{
+    .buttons button {
+        width: 8vh;
+        height: 8vh;
+        font-size: 5vh;
+        margin: 1vh;
+        background: none;
+        border: none;
+        color: #FFFFFF;
+    }
+
+    .buttons button:hover {
+        color: #979797;
+    }
+
+    .row.buttons {
         flex: 0 1 auto;
         height: 10vh;
     }
 
-    .settingscol{
+    .settingscol {
         flex: 0 1 auto;
         width: 15vw;
     }
 
-    #can{
+    #can {
         width: 100%;
         height: 100%;
     }
 
-    .row.can{
+    .row.can {
         height: 90vh;
         flex: 2 1 auto;
     }
-
 </style>
 <script>
-        start();
+    start();
 </script>
